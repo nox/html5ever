@@ -207,6 +207,13 @@ impl TreeSink for RcDom {
         new_node(Comment(text))
     }
 
+    fn same_home_subtree(&self, _x: Handle, _y: Handle) -> bool {
+        true
+    }
+
+    fn associate_with_form(&mut self, _target: Handle, _form: Handle) {
+    }
+
     fn append(&mut self, parent: Handle, child: NodeOrText<Handle>) {
         // Append to an existing Text node if we have one.
         match child {

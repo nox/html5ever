@@ -64,6 +64,10 @@ impl TreeSink for Sink {
         x == y
     }
 
+    fn same_home_subtree(&self, _x: usize, _y: usize) -> bool {
+        true
+    }
+
     fn elem_name(&self, target: usize) -> QualName {
         self.names.get(&target).expect("not an element").clone()
     }
@@ -99,9 +103,8 @@ impl TreeSink for Sink {
             AppendText(t)
                 => println!("Append text before {}: \"{}\"", sibling, escape_default(&t)),
         }
-
         // `sibling` will have a parent unless a script moved it, and we're
-        // not running scripts.  Therefore we can aways return `Ok(())`.
+        // not running scripts.  Therefore we can always return `Ok(())`.
         Ok(())
     }
 
@@ -118,6 +121,12 @@ impl TreeSink for Sink {
         for attr in attrs.into_iter() {
             println!("    {:?} = {}", attr.name, attr.value);
         }
+    }
+
+    fn associate_with_form(&mut self, _target: usize, _form: usize) {
+        // No form owner support. Since same_home_subtree always returns
+        // true we cannot be sure that this associate_with_form call is
+        // valid
     }
 
     fn remove_from_parent(&mut self, target: usize) {

@@ -769,10 +769,31 @@ impl<Handle, Sink> TreeBuilderActions<Handle>
         // FIXME: application cache selection algorithm
     }
 
+    // https://html.spec.whatwg.org/multipage/syntax.html#create-an-element-for-the-token
     fn insert_element(&mut self, push: PushFlag, ns: Namespace, name: Atom, attrs: Vec<Attribute>)
             -> Handle {
-        let elem = self.sink.create_element(QualName::new(ns, name), attrs);
+        declare_tag_set!(form_associated =
+            "button" "fieldset" "input" "keygen" "label"
+            "object" "output" "select" "textarea" "img");
+
+        declare_tag_set!(reassociatable = [form_associated] - "img");
+
+        let qname = QualName::new(ns, name);
+        let elem = self.sink.create_element(qname.clone(), attrs.clone());
+
         self.insert_appropriately(AppendNode(elem.clone()), None);
+
+        if let Some(form) = self.form_elem.clone() {
+            if form_associated(qname.clone()) && !self.in_html_elem_named(atom!("template")) {
+                let has_form_attribute = attrs.iter().any(|a| a.name == qualname!("", "form"));
+                if !reassociatable(qname.clone()) || !has_form_attribute {
+                    if self.sink.same_home_subtree(elem.clone(), form.clone()) {
+                        self.sink.associate_with_form(elem.clone(), form);
+                    }
+                }
+            }
+        }
+
         match push {
             Push => self.push(&elem),
             NoPush => (),

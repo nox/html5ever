@@ -68,6 +68,10 @@ pub trait TreeSink {
     /// Do two handles refer to the same node?
     fn same_node(&self, x: Self::Handle, y: Self::Handle) -> bool;
 
+    /// Are two handles present in the same tree
+    /// https://html.spec.whatwg.org/multipage/infrastructure.html#home-subtree
+    fn same_home_subtree(&self, x: Self::Handle, y: Self::Handle) -> bool;
+
     /// What is the name of this element?
     ///
     /// Should never be called on a non-element node;
@@ -119,6 +123,9 @@ pub trait TreeSink {
     /// already exists. The tree builder promises this will never be called
     /// with something else than an element.
     fn add_attrs_if_missing(&mut self, target: Self::Handle, attrs: Vec<Attribute>);
+
+    /// Associate the given form-associatable element with the form element
+    fn associate_with_form(&mut self, target: Self::Handle, form: Self::Handle);
 
     /// Detach the given node from its parent.
     fn remove_from_parent(&mut self, target: Self::Handle);
