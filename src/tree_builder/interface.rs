@@ -46,6 +46,20 @@ pub enum NextParserState {
     Continue,
 }
 
+/// A HTML `<script>` element's "parser-inserted" flag.
+#[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
+pub enum ParserInsertedFlag {
+    Parser,
+    Script,
+}
+
+/// A HTML `<script>` element's "non-blocking" flag.
+#[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
+pub enum NonBlockingFlag {
+    Blocking,
+    NonBlocking,
+}
+
 /// Types which can process tree modifications from the tree builder.
 pub trait TreeSink {
     /// `Handle` is a reference to a DOM node.  The tree builder requires
@@ -127,6 +141,16 @@ pub trait TreeSink {
 
     /// Mark a HTML `<script>` element as "already started".
     fn mark_script_already_started(&mut self, node: Self::Handle);
+
+    /// Set a HTML `<script>` element's "parser-inserted" flag.
+    /// https://html.spec.whatwg.org/multipage/#parser-inserted
+    fn set_script_parser_inserted_flag(&mut self, node: Self::Handle,
+                                       flag: ParserInsertedFlag);
+
+    /// Set a HTML `<script>` element's "non-blocking" flag.
+    /// https://html.spec.whatwg.org/multipage/#non-blocking
+    fn set_script_non_blocking_flag(&mut self, node: Self::Handle,
+                                    flag: NonBlockingFlag);
 
     /// Indicate that a `<script>` element is complete.
     fn complete_script(&mut self, _node: Self::Handle) -> NextParserState {

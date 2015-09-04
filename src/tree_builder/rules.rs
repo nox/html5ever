@@ -12,7 +12,8 @@
 use tree_builder::types::*;
 use tree_builder::tag_sets::*;
 use tree_builder::actions::{NoPush, Push, TreeBuilderActions};
-use tree_builder::interface::{TreeSink, Quirks, AppendNode, NextParserState};
+use tree_builder::interface::{AppendNode, NextParserState, NonBlockingFlag};
+use tree_builder::interface::{ParserInsertedFlag, Quirks, TreeSink};
 
 use tokenizer::{Attribute, EndTag, StartTag, Tag};
 use tokenizer::states::{Rcdata, Rawtext, ScriptData, Plaintext, Quiescent};
@@ -138,6 +139,10 @@ impl<Handle, Sink> TreeBuilderStep
 
                 tag @ <script> => {
                     let elem = self.sink.create_element(qualname!(HTML, script), tag.attrs);
+                    self.sink.set_script_parser_inserted_flag(elem.clone(),
+                                                              ParserInsertedFlag::Parser);
+                    self.sink.set_script_non_blocking_flag(elem.clone(),
+                                                           NonBlockingFlag::NonBlocking);
                     if self.is_fragment() {
                         self.sink.mark_script_already_started(elem.clone());
                     }
